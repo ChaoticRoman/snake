@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Snake Game</title>
+<style>
+  body {
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  #game-area {
+    position: relative;
+    width: 400px;
+    height: 400px;
+    border: 1px solid #000;
+  }
+  .snake {
+    width: 20px;
+    height: 20px;
+    background-color: #333;
+    position: absolute;
+  }
+  .food {
+    width: 20px;
+    height: 20px;
+    background-color: red;
+    position: absolute;
+  }
+</style>
+</head>
+<body>
+<div id="game-area"></div>
+<script>
+  const gameArea = document.getElementById('game-area');
+  const gameWidth = gameArea.clientWidth;
+  const gameHeight = gameArea.clientHeight;
+  const snakeSize = 20;
+  let snake = [{x: snakeSize * 5, y: snakeSize * 5}];
+  let food = {x: snakeSize * 10, y: snakeSize * 10};
+  let dx = snakeSize;
+  let dy = 0;
+  let score = 0;
+
+  function drawSnakePart(snakePart) {
+    const snakeElement = document.createElement('div');
+    snakeElement.style.left = `${snakePart.x}px`;
+    snakeElement.style.top = `${snakePart.y}px`;
+    snakeElement.classList.add('snake');
+    gameArea.appendChild(snakeElement);
+  }
+
+  function drawSnake() {
+    snake.forEach(drawSnakePart);
+  }
+
+  function moveSnake() {
+    const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+    snake.unshift(head);
+    if (head.x === food.x && head.y === food.y) {
+      score += 1;
+      createFood();
+    } else {
+      snake.pop();
+    }
+  }
+
+  function changeDirection(event) {
+    const LEFT_KEY = 37;
+    const RIGHT_KEY = 39;
+    const UP_KEY = 38;
+    const DOWN_KEY = 40;
+    const keyPressed = event.keyCode;
+    const goingUp = dy === -snakeSize;
+    const goingDown = dy === snakeSize;
+    const goingRight = dx === snakeSize;
+    const goingLeft = dx === -snakeSize;
+    if (keyPressed === LEFT_KEY && !goingRight) {
+      dx = -snakeSize;
+      dy = 0;
+    }
+    if (keyPressed === UP_KEY && !goingDown) {
+      dx = 0;
+      dy = -snakeSize;
+    }
+    if (keyPressed === RIGHT_KEY && !goingLeft) {
+      dx = snakeSize;
+      dy = 0;
+    }
+    if (keyPressed === DOWN_KEY && !goingUp) {
+      dx = 0;
+      dy = snakeSize;
+    }
+  }
+
+  function randomFood(min, max) {
+    return Math.round((Math.random() * (max-min) + min) / snakeSize) * snakeSize;
+  }
+
+  function createFood() {
+    food = {
+      x: randomFood(0, gameWidth - snakeSize),
+      y: randomFood(0, gameHeight - snakeSize)
+    };
+  }
+
+  function drawFood() {
+    const foodElement = document.createElement('div');
+    foodElement.style.left = `${food.x}px`;
+    foodElement.style.top = `${food.y}px`;
+    foodElement.classList.add('food');
+    gameArea.appendChild(foodElement);
+  }
+
+  function clearCanvas() {
+    gameArea.innerHTML = '';
+  }
+
+  function gameLoop() {
+    clearCanvas();
+    moveSnake();
+    drawSnake();
+    drawFood();
+    setTimeout(gameLoop, 100);
+  }
+
+  document.addEventListener('keydown', changeDirection);
+  gameLoop();
+</script>
+</body>
+</html>
